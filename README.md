@@ -75,6 +75,7 @@ typeset into a clean monolingual PDF, while `OUTLINE.md` presents both side by s
 - 源码 / Source：<https://github.com/matrixorigin/matrixone>
 - 系统架构 / System architecture：<https://medium.com/@matrixorigin-database/matrixone-system-architecture-8d4de36649ea>
 - MatrixOS（GPU 异构算力）/ MatrixOS：<https://www.matrixorigin.io/posts/MatrixOne-MatrixOS>
+- GPU 向量检索 / GPU vector search (cuVS)：<https://www.matrixorigin.io/blog/matrixone-nvidia-cuvs-vector-search>
 - 智能体记忆 / Agent memory：<https://github.com/matrixorigin/Memoria>
 
 > ⚠️ 所有技术细节、版本号与性能数据在定稿前需对照官方最新资料核实。

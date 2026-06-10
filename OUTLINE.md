@@ -95,9 +95,9 @@
   - HA Keeper（单 Raft 组）集群管理；LogService 需 SSD 保障高吞吐
 - 4.5 三大解耦：存算分离 / 读写分离 / 冷热分离 / The three separations　🟢
 - 4.6 异构算力与 GPU 加速 / Heterogeneous compute & GPU acceleration　🔵 ★
-  - CPU + GPU 异构算力统一纳管与调度（MatrixDC，详见第 08 章）
-  - GPU 加速场景：向量索引构建/检索、AI 解析与 Embedding、模型训练/推理
-  - RDMA 高速网络保障多机 GPU 通信（核心库内 GPU 能力边界待核实）
+  - 库内 GPU 向量检索：集成 NVIDIA cuVS，IVF-Flat / IVF-PQ / CAGRA（详见 06.4）
+  - 平台级异构算力：CPU + GPU 统一纳管调度（MatrixDC）+ RDMA 网络（详见第 08 章）
+  - 其他 GPU 场景：AI 解析与 Embedding、模型训练 / 推理（MatrixGenesis）
 - 4.7 [架构图] 组件全景 / [Diagram] component panorama　🔵（待绘制）
 
 ### 05 · 存储引擎 TAE / Storage Engine: TAE　🟡
@@ -120,11 +120,19 @@
 - 6.3 **AI 原生：向量与全文检索** / AI-native: vector & full-text search　🟡🔵 ★
   - 向量类型（vecf32 / vecf64）· IVF / HNSW 索引 · 全文检索
   - 混合检索（标量 + 向量 + 全文）· **Pinecone 兼容 API** · RAG 支持 · 库内 ML
-  - **GPU 加速**：向量索引构建与相似度检索的 GPU 加速（异构算力，详见 04.6 / 第 08 章）
-- 6.4 内置流引擎与增量物化视图（IVM）/ Built-in streaming & incremental materialized views　🟢
-- 6.5 分布式高可用（Multi-Raft）/ Distributed high availability　🟢
-- 6.6 企业级安全与合规（RBAC / TLS / 加密 / 审计）/ Enterprise security & compliance　🟢
-- 6.7 MySQL 兼容性（协议 / 语法 / 生态工具，兼容 8.0）/ MySQL compatibility　🟢
+- 6.4 **GPU 加速向量检索（NVIDIA cuVS）** / GPU-accelerated vector search (NVIDIA cuVS)　🔵 ★
+  - GPU 索引：IVF-Flat · IVF-PQ（pq_bits=8，约 10× 压缩）· CAGRA（GPU 原生图索引）
+  - GPU 构建 + GPU 检索；混合查询用 **bitset 谓词下推**（SQL 过滤 × 向量检索）
+  - 集成方式：C++ worker 线程长驻管理 GPU 资源，桥接 Go 内核与 cuVS / RAFT
+  - 实测（88M × 768 维，L40S / H20，最多 8 GPU；数据以最新博客为准）：
+    - 建索引：CPU IVF-Flat 6h23m → GPU IVF-Flat 20min（~19×）；GPU IVF-PQ 50min（~7.7×）
+    - 检索：CPU 4 QPS → GPU IVF-PQ 759 QPS（~210×）；带元数据过滤 2.6 → 80 QPS（~30×）
+    - 8 GPU 集群上 88M 索引压缩至 ~3.5 GB/GPU
+  - 生产案例：安利（Amway）、JST 等使用 NVIDIA H20
+- 6.5 内置流引擎与增量物化视图（IVM）/ Built-in streaming & incremental materialized views　🟢
+- 6.6 分布式高可用（Multi-Raft）/ Distributed high availability　🟢
+- 6.7 企业级安全与合规（RBAC / TLS / 加密 / 审计）/ Enterprise security & compliance　🟢
+- 6.8 MySQL 兼容性（协议 / 语法 / 生态工具，兼容 8.0）/ MySQL compatibility　🟢
 
 ### 07 · MatrixOne Cloud 与 Serverless / MatrixOne Cloud & Serverless　🟢
 > 基线：2024 第 04 章，基本沿用，核对最新计费与可用区。
@@ -151,7 +159,8 @@
 > 基线：2024 第 05 章；升级点：把 AI 收益并入。
 - 9.1 极简开发：技术栈从 6+ 收敛到 1，无需 ETL / Radically simpler stack　🟢
 - 9.2 高扩展性：独立、动态、自主弹性 / Independent, dynamic, elastic scaling　🟢
-- 9.3 高性价比：更高性能、更低成本（对象存储 + 向量化执行 + 按量付费）/ Performance & cost　🟢
+- 9.3 高性价比：更高性能、更低成本（对象存储 + 向量化执行 + GPU 向量检索 + 按量付费）/ Performance & cost　🟡
+  - GPU 向量检索数量级提速（cuVS，详见 06.4）
 - 9.4 高灵活性：任意类型 / 任意负载 / 任意环境（含向量/多模态）/ Flexibility　🟡
 
 ### 10 · 应用场景 / Use Cases　🟡
@@ -189,6 +198,7 @@
 | FIG-5 | 06.3 | 混合检索流程（标量+向量+全文）/ Hybrid search pipeline |
 | FIG-6 | 08 | MatrixOS 生态全景（MatrixDC / MatrixOne / MatrixGenesis）/ MatrixOS ecosystem |
 | FIG-7 | 04/08 | 异构算力与 GPU 加速调度（MatrixDC + RDMA）/ Heterogeneous compute & GPU scheduling |
+| FIG-8 | 06 | GPU 向量检索性能对比（cuVS：建索引时间 / QPS）/ GPU vector search benchmark (cuVS) |
 
 ---
 
@@ -202,7 +212,8 @@
 - [ ] MatrixOne Cloud 支持的云厂商与可用区现状 / Cloud providers & regions
 - [ ] 最新资质荣誉、客户案例与授权数据 / Latest honors & customer numbers
 - [ ] Memoria / Intelligence 各组件的最新命名与能力边界 / Latest ecosystem naming
-- [ ] **核心库内 GPU 加速边界**：向量索引构建/检索是否走 GPU / Core-engine GPU acceleration scope
+- [x] **核心库内 GPU 加速**：已确认经 NVIDIA cuVS 实现 GPU 向量索引/检索（IVF-Flat / IVF-PQ / CAGRA）/ Confirmed via cuVS
+- [ ] cuVS 集成最新性能数据、支持的 GPU 型号与距离度量（L2/IP/cosine）/ Latest cuVS figures, GPUs, metrics
 - [ ] **MatrixDC** 异构算力调度细节、支持的 GPU 型号与 RDMA 方案 / MatrixDC scheduling & supported GPUs
 - [ ] **MatrixOS** 体系与三大组件（MatrixDC/MatrixOne/MatrixGenesis）的最新官方命名 / Latest MatrixOS naming
 
@@ -211,3 +222,4 @@
 > **本轮新增参考 / Added references：**
 > - MatrixOne System Architecture（Medium）：<https://medium.com/@matrixorigin-database/matrixone-system-architecture-8d4de36649ea>
 > - MatrixOne → MatrixOS（AI Infra / AI Platform）：<https://www.matrixorigin.io/posts/MatrixOne-MatrixOS>
+> - MatrixOne × NVIDIA cuVS（GPU 向量检索）：<https://www.matrixorigin.io/blog/matrixone-nvidia-cuvs-vector-search>
