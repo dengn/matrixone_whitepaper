@@ -60,7 +60,7 @@
   - 数据重复、ETL、一致性、授权成本、缺失 DBMS 级完整性
 
 ### 02 · 数据库技术演进趋势 / Database Technology Trends　🟡
-> 基线：2024 第 02 章；升级点：新增 2.4「数据版本化 / Git-for-Data」趋势。
+> 基线：2024 第 02 章；升级点：新增 2.4 数据版本化（Git-for-Data）与 2.5 加速计算（GPU 通用化）两大趋势。
 - 2.1 数据引擎能力迈向融合 / Convergence of data engines　🟢
   - NewSQL · HTAP · 流批一体 · 湖仓一体 → **HSTAP**
 - 2.2 云原生技术逐步成熟 / Maturing cloud-native foundations　🟢
@@ -69,6 +69,17 @@
   - 向量需求爆发、Text2SQL 降低门槛、BI+AI 融合
 - 2.4 数据版本化与 Git-for-Data 趋势 / Data versioning & the Git-for-Data trend　🔵
   - 实验隔离、可回溯、可审计；AI 训练集/验证集的版本化需求
+- 2.5 加速计算：GPU 从 AI 专用走向通用数据负载 / Accelerated computing: GPUs go general-purpose　🔵 ★
+  - 范式转变：后摩尔时代，GPU 从模型训练/推理延伸到 ETL、SQL 分析、向量检索等**通用数据处理**
+  - **NVIDIA 最新洞察与实践 / NVIDIA insights & practice：**
+    - RAPIDS / cuDF：端到端数据科学 GPU 化（典型 50×+），cuDF 零代码加速 pandas
+    - GPU 原生查询执行：cuDF × Velox 为 Presto / Spark 提供 GPU 原生执行，较 CPU 最高 ~12×
+    - Spark RAPIDS + Project Aether：自动化迁移优化（GCP 实测 ~4× 提速、~76% 成本下降）
+    - GPU for ETL：高并行 SparkSQL 算子在 GPU 上显著降本提速
+  - 向量检索进入主流数据库：Oracle AI Database 26ai、Microsoft SQL Server 2025 经 **NVIDIA cuVS** 提供 GPU 向量索引
+  - 行业信号：NVIDIA GTC 2026 议题《The Era of GPU Data Processing: From SQL to Search and Back Again》
+  - **对数据库的含义**：GPU 正从「AI 旁路」成为数据库引擎的一等公民 → MatrixOne 内核内置 GPU 向量检索（cuVS，详见 06.4）正契合这一趋势
+    > 注：以上 NVIDIA 数据为厂商公开口径，引用时需注明来源并核对时效 / Vendor-published figures; cite with attribution and verify
 
 ### 03 · MatrixOne 产品概览 / MatrixOne Product Overview　🟡
 > 基线：2024 第 03.1–03.3；升级点：定位语升级为 One database for everything、加入 AI 原生。
@@ -214,6 +225,7 @@
 - [x] **核心库内 GPU 加速**：已确认经 NVIDIA cuVS 实现 GPU 向量索引/检索（IVF-Flat / IVF-PQ / CAGRA）/ Confirmed via cuVS
 - [ ] cuVS 集成最新性能数据、支持的 GPU 型号与距离度量（L2/IP/cosine）/ Latest cuVS figures, GPUs, metrics
 - [ ] AI 生态最新组件构成与命名（MatrixGenesis / MatrixPipeline / MatrixSearch / Memoria 等）/ Latest ecosystem composition & naming
+- [ ] NVIDIA 趋势数据与 GTC 引用核对（cuDF/Velox、Spark RAPIDS、Oracle 26ai 的数字与时效）/ Verify NVIDIA trend figures & GTC references
 
 > ⚠️ 以上均以官方文档 <https://docs.matrixorigin.cn> 与源码 <https://github.com/matrixorigin/matrixone> 为准。
 >
@@ -221,3 +233,7 @@
 > - MatrixOne System Architecture（Medium）：<https://medium.com/@matrixorigin-database/matrixone-system-architecture-8d4de36649ea>
 > - MatrixOrigin 产品体系演进（AI Infra / AI Platform）：<https://www.matrixorigin.io/posts/MatrixOne-MatrixOS>
 > - MatrixOne × NVIDIA cuVS（GPU 向量检索）：<https://www.matrixorigin.io/blog/matrixone-nvidia-cuvs-vector-search>
+> - NVIDIA cuDF × Velox（GPU 原生查询执行）：<https://developer.nvidia.com/blog/accelerating-large-scale-data-analytics-with-gpu-native-velox-and-nvidia-cudf/>
+> - NVIDIA RAPIDS（GPU 数据科学）：<https://rapids.ai/>
+> - NVIDIA GTC 2026《The Era of GPU Data Processing》：<https://www.nvidia.com/gtc/session-catalog/sessions/gtc26-s81769/>
+> - Oracle AI Database 26ai × NVIDIA cuVS（GPU 向量索引）：<https://blogs.oracle.com/database/oracle-ai-database-nvidia-collaboration-advances-enterprise-ai-at-nvidia-gtc-2026>
