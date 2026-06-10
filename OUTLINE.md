@@ -32,7 +32,7 @@
 | 05 | `05-storage-engine-tae` | 存储引擎 TAE | Storage Engine: TAE | 🟡 |
 | 06 | `06-key-features` | 核心特性 | Key Features | 🟡🔵 |
 | 07 | `07-matrixone-cloud` | MatrixOne Cloud 与 Serverless | MatrixOne Cloud & Serverless | 🟢 |
-| 08 | `08-matrixone-intelligence` | MatrixOne Intelligence：面向 AI 的数据底座 | MatrixOne Intelligence: Data Backbone for AI | 🔵 |
+| 08 | `08-matrixone-intelligence` | MatrixOS 生态：GPU 异构算力与 AI 数据底座 | MatrixOS Ecosystem: GPU/Heterogeneous Compute & AI Backbone | 🔵 |
 | 09 | `09-value-benefits` | 应用收益 | Value & Benefits | 🟡 |
 | 10 | `10-use-cases` | 应用场景 | Use Cases | 🟡 |
 | 11 | `11-about-matrixorigin` | 关于矩阵起源 | About MatrixOrigin | 🟢 |
@@ -82,25 +82,34 @@
   - 社区版 / 企业版 / MatrixOne Cloud
 
 ### 04 · 云原生技术架构 / Cloud-Native Architecture　🟡
-> 基线：2024 第 03.4 + 03.5；升级点：拆为独立架构章，深化三层解耦与组件职责。
-- 4.1 整体架构：计算 / 事务 / 共享存储三层解耦 / Three-layer disaggregation　🟢
+> 基线：2024 第 03.4 + 03.5 + Medium《MatrixOne System Architecture》；升级点：深化四层组件职责与事务模型，新增异构算力 / GPU。
+- 4.1 整体架构：计算 / 事务 / 日志 / 存储四层 + 云服务 / Four-layer architecture + cloud services　🟡
+  - 计算层 CN · 事务层 TN · 日志服务 LogService · 存储层 File Service
 - 4.2 计算层 CN：无状态、Serverless、多级缓存、负载隔离 / Compute layer (CN)　🟢
   - CNSet / CN Group · MatrixOne Proxy 会话级 SQL 路由
-- 4.3 事务层 TN：分布式事务、冲突检测、隔离级别 / Transaction layer (TN)　🟢
+- 4.3 事务层 TN：分布式事务、冲突检测、隔离级别 / Transaction layer (TN)　🟡
+  - Shared-nothing、主键哈希分布；2PC + Clock-SI 时间戳；HLC 解决时钟漂移
   - SI / RC 隔离级别，乐观 / 悲观事务模型
-- 4.4 共享存储层：对象存储 + LogService / Shared storage & LogService　🟢
-  - Multi-Raft 共享日志、dragonboat、低延迟提交、异步转存对象存储
+- 4.4 日志与共享存储层：LogService + 对象存储 / LogService & shared storage　🟡
+  - Multi-Raft 共享日志（dragonboat）· append-only · 低延迟提交 · 异步转存对象存储
+  - HA Keeper（单 Raft 组）集群管理；LogService 需 SSD 保障高吞吐
 - 4.5 三大解耦：存算分离 / 读写分离 / 冷热分离 / The three separations　🟢
-- 4.6 [架构图] 组件全景 / [Diagram] component panorama　🔵（待绘制）
+- 4.6 异构算力与 GPU 加速 / Heterogeneous compute & GPU acceleration　🔵 ★
+  - CPU + GPU 异构算力统一纳管与调度（MatrixDC，详见第 08 章）
+  - GPU 加速场景：向量索引构建/检索、AI 解析与 Embedding、模型训练/推理
+  - RDMA 高速网络保障多机 GPU 通信（核心库内 GPU 能力边界待核实）
+- 4.7 [架构图] 组件全景 / [Diagram] component panorama　🔵（待绘制）
 
 ### 05 · 存储引擎 TAE / Storage Engine: TAE　🟡
 > 基线：2024「高性价比存储引擎」段落；升级点：独立成章，补充数据组织细节。
 - 5.1 TAE 设计目标：事务 + 分析一体 / Unified transaction + analytics　🟢
 - 5.2 行列混合存储与 Column Family / Hybrid row-column storage　🟢
-- 5.3 File Service：异构存储介质抽象 / File Service abstraction　🟢
+  - 列存为主 · append-only 写入 · merge-on-read 合并读
+- 5.3 File Service：异构存储介质抽象（S3 / HDFS / NFS / 本地盘）/ File Service abstraction　🟢
 - 5.4 分级存储与多级缓存（内存 + 本地盘 + 对象存储）/ Tiered storage & caching　🟢
-- 5.5 数据组织：Checkpoint / LogTail / Snapshot / Data organization　🔵
-- 5.6 纠删码与冗余（~150% 冗余的高可用）/ Erasure coding & redundancy　🔵（待核实数据）
+- 5.5 块级索引：Bloom Filter 与 Min-Max / Zonemap / Block-level indices　🔵
+- 5.6 数据组织：Checkpoint / LogTail / Snapshot / Data organization　🔵
+- 5.7 纠删码与冗余（~150% 冗余的高可用）/ Erasure coding & redundancy　🔵（待核实数据）
 
 ### 06 · 核心特性 / Key Features　🟡🔵
 > 基线：2024 第 03.5 重点特性；升级点：新增 Git-for-Data、扩写 AI 原生（向量+全文+混合检索+Pinecone 兼容）。
@@ -111,6 +120,7 @@
 - 6.3 **AI 原生：向量与全文检索** / AI-native: vector & full-text search　🟡🔵 ★
   - 向量类型（vecf32 / vecf64）· IVF / HNSW 索引 · 全文检索
   - 混合检索（标量 + 向量 + 全文）· **Pinecone 兼容 API** · RAG 支持 · 库内 ML
+  - **GPU 加速**：向量索引构建与相似度检索的 GPU 加速（异构算力，详见 04.6 / 第 08 章）
 - 6.4 内置流引擎与增量物化视图（IVM）/ Built-in streaming & incremental materialized views　🟢
 - 6.5 分布式高可用（Multi-Raft）/ Distributed high availability　🟢
 - 6.6 企业级安全与合规（RBAC / TLS / 加密 / 审计）/ Enterprise security & compliance　🟢
@@ -123,14 +133,18 @@
 - 7.3 按 SQL 计费：CU（Compute Unit）与消费速率控制 / CU-based billing
 - 7.4 核心特性：零门槛 / 全托管 / Serverless SQL / 多租户 / 极速分析 / 多云 / Core features
 
-### 08 · MatrixOne Intelligence：面向 AI 的数据底座 / Data Backbone for AI　🔵
-> 全新章节，作为产品白皮书与《Intelligence 解决方案白皮书》之间的桥梁；本章概述，细节引用解决方案白皮书。
-- 8.1 从数据库到 AI 数据智能平台 / From database to AI data intelligence platform
-- 8.2 生态组件总览 / Ecosystem components
-  - MatrixDC（算网调度）· MatrixPipeline（多模态数据工程）· MatrixGenesis（模型/Agent 开发）· MatrixSearch（多模态检索）
-- 8.3 Agent 记忆底座与 Memoria / Agent memory backbone & Memoria
+### 08 · MatrixOS 生态：GPU 异构算力与 AI 数据底座 / MatrixOS Ecosystem　🔵
+> 全新章节；桥接《Intelligence 解决方案白皮书》。MatrixOne 正演进为 **MatrixOS** 体系：MatrixDC（异构算力）+ MatrixOne（数据）+ MatrixGenesis（AI 应用）。命名以官方最新为准（待核实）。参考：Medium / matrixorigin.io《MatrixOne → MatrixOS》。
+- 8.1 从 MatrixOne 到 MatrixOS：AI Infra + AI Platform / From MatrixOne to MatrixOS
+- 8.2 **MatrixDC：异构算力治理调度与 GPU 加速** / MatrixDC: heterogeneous compute & GPU acceleration　★
+  - CPU + GPU 服务器统一纳管、组网、调度、运营；K8s + RDMA 高速网络 + 对象存储
+  - Serverless 化算力调用；作为 MatrixOne 与 MatrixGenesis 的资源底座
+- 8.3 **MatrixGenesis：GPU 驱动的模型训练/精调/推理与 AI 解析** / MatrixGenesis: GPU-driven training & parsing
+  - LLM / Embedding / 多模态模型；GPU 加速并行解析与特征工程；Agent 工作流
+- 8.4 数据工程与检索：MatrixPipeline / MatrixSearch / Data engineering & search
+- 8.5 Agent 记忆底座与 Memoria / Agent memory backbone & Memoria
   - 长期上下文、防幻觉、数据一致性
-- 8.4 RAG 与多模态协同：库内向量检索 × 解决方案 / RAG & multimodal synergy
+- 8.6 RAG 与多模态协同：库内向量检索 × 解决方案 / RAG & multimodal synergy
   - > 详见《MatrixOne Intelligence 解决方案白皮书》/ See the Intelligence solution whitepaper
 
 ### 09 · 应用收益 / Value & Benefits　🟡
@@ -173,7 +187,8 @@
 | FIG-3 | 05 | TAE 存储引擎内部结构 / TAE internals |
 | FIG-4 | 06.2 | Git for Data：快照/分支/时间旅行示意 / Git-for-Data concept |
 | FIG-5 | 06.3 | 混合检索流程（标量+向量+全文）/ Hybrid search pipeline |
-| FIG-6 | 08 | MatrixOne Intelligence 生态全景 / Intelligence ecosystem |
+| FIG-6 | 08 | MatrixOS 生态全景（MatrixDC / MatrixOne / MatrixGenesis）/ MatrixOS ecosystem |
+| FIG-7 | 04/08 | 异构算力与 GPU 加速调度（MatrixDC + RDMA）/ Heterogeneous compute & GPU scheduling |
 
 ---
 
@@ -187,5 +202,12 @@
 - [ ] MatrixOne Cloud 支持的云厂商与可用区现状 / Cloud providers & regions
 - [ ] 最新资质荣誉、客户案例与授权数据 / Latest honors & customer numbers
 - [ ] Memoria / Intelligence 各组件的最新命名与能力边界 / Latest ecosystem naming
+- [ ] **核心库内 GPU 加速边界**：向量索引构建/检索是否走 GPU / Core-engine GPU acceleration scope
+- [ ] **MatrixDC** 异构算力调度细节、支持的 GPU 型号与 RDMA 方案 / MatrixDC scheduling & supported GPUs
+- [ ] **MatrixOS** 体系与三大组件（MatrixDC/MatrixOne/MatrixGenesis）的最新官方命名 / Latest MatrixOS naming
 
 > ⚠️ 以上均以官方文档 <https://docs.matrixorigin.cn> 与源码 <https://github.com/matrixorigin/matrixone> 为准。
+>
+> **本轮新增参考 / Added references：**
+> - MatrixOne System Architecture（Medium）：<https://medium.com/@matrixorigin-database/matrixone-system-architecture-8d4de36649ea>
+> - MatrixOne → MatrixOS（AI Infra / AI Platform）：<https://www.matrixorigin.io/posts/MatrixOne-MatrixOS>
