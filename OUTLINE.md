@@ -32,7 +32,7 @@
 | 05 | `05-storage-engine-tae` | 存储引擎 TAE | Storage Engine: TAE | 🟡 |
 | 06 | `06-key-features` | 核心特性 | Key Features | 🟡🔵 |
 | 07 | `07-matrixone-cloud` | MatrixOne Cloud 与 Serverless | MatrixOne Cloud & Serverless | 🟢 |
-| 08 | `08-matrixone-intelligence` | MatrixOS 生态：GPU 异构算力与 AI 数据底座 | MatrixOS Ecosystem: GPU/Heterogeneous Compute & AI Backbone | 🔵 |
+| 08 | `08-matrixone-intelligence` | MatrixOne Intelligence：面向 AI 的数据底座与生态 | MatrixOne Intelligence: AI Data Backbone & Ecosystem | 🔵 |
 | 09 | `09-value-benefits` | 应用收益 | Value & Benefits | 🟡 |
 | 10 | `10-use-cases` | 应用场景 | Use Cases | 🟡 |
 | 11 | `11-about-matrixorigin` | 关于矩阵起源 | About MatrixOrigin | 🟢 |
@@ -96,7 +96,7 @@
 - 4.5 三大解耦：存算分离 / 读写分离 / 冷热分离 / The three separations　🟢
 - 4.6 异构算力与 GPU 加速 / Heterogeneous compute & GPU acceleration　🔵 ★
   - 库内 GPU 向量检索：集成 NVIDIA cuVS，IVF-Flat / IVF-PQ / CAGRA（详见 06.4）
-  - 平台级异构算力：CPU + GPU 统一纳管调度（MatrixDC）+ RDMA 网络（详见第 08 章）
+  - 平台级异构算力：基于 K8s 的 CPU + GPU 资源调度 + RDMA 高速网络（详见第 08 章）
   - 其他 GPU 场景：AI 解析与 Embedding、模型训练 / 推理（MatrixGenesis）
 - 4.7 [架构图] 组件全景 / [Diagram] component panorama　🔵（待绘制）
 
@@ -141,18 +141,17 @@
 - 7.3 按 SQL 计费：CU（Compute Unit）与消费速率控制 / CU-based billing
 - 7.4 核心特性：零门槛 / 全托管 / Serverless SQL / 多租户 / 极速分析 / 多云 / Core features
 
-### 08 · MatrixOS 生态：GPU 异构算力与 AI 数据底座 / MatrixOS Ecosystem　🔵
-> 全新章节；桥接《Intelligence 解决方案白皮书》。MatrixOne 正演进为 **MatrixOS** 体系：MatrixDC（异构算力）+ MatrixOne（数据）+ MatrixGenesis（AI 应用）。命名以官方最新为准（待核实）。参考：Medium / matrixorigin.io《MatrixOne → MatrixOS》。
-- 8.1 从 MatrixOne 到 MatrixOS：AI Infra + AI Platform / From MatrixOne to MatrixOS
-- 8.2 **MatrixDC：异构算力治理调度与 GPU 加速** / MatrixDC: heterogeneous compute & GPU acceleration　★
-  - CPU + GPU 服务器统一纳管、组网、调度、运营；K8s + RDMA 高速网络 + 对象存储
-  - Serverless 化算力调用；作为 MatrixOne 与 MatrixGenesis 的资源底座
-- 8.3 **MatrixGenesis：GPU 驱动的模型训练/精调/推理与 AI 解析** / MatrixGenesis: GPU-driven training & parsing
-  - LLM / Embedding / 多模态模型；GPU 加速并行解析与特征工程；Agent 工作流
-- 8.4 数据工程与检索：MatrixPipeline / MatrixSearch / Data engineering & search
-- 8.5 Agent 记忆底座与 Memoria / Agent memory backbone & Memoria
+### 08 · MatrixOne Intelligence：面向 AI 的数据底座与生态 / MatrixOne Intelligence: AI Data Backbone & Ecosystem　🔵
+> 全新章节；桥接《Intelligence 解决方案白皮书》。本章概述，细节引用解决方案白皮书。组件构成与命名以官方最新为准（待核实）。
+- 8.1 从数据库到 AI 数据智能平台 / From database to AI data intelligence platform
+- 8.2 生态组件总览 / Ecosystem components
+  - MatrixGenesis（模型 / Agent 开发，GPU 训练/精调/推理）· MatrixPipeline（多模态数据工程）· MatrixSearch（多模态检索）
+- 8.3 GPU 与异构算力 / GPU & heterogeneous compute　★
+  - 基于 K8s 的 CPU + GPU 资源调度 + RDMA 高速网络
+  - 训练/推理 + 库内 cuVS 向量检索（详见 06.4）
+- 8.4 Agent 记忆底座与 Memoria / Agent memory backbone & Memoria
   - 长期上下文、防幻觉、数据一致性
-- 8.6 RAG 与多模态协同：库内向量检索 × 解决方案 / RAG & multimodal synergy
+- 8.5 RAG 与多模态协同：库内向量检索 × 解决方案 / RAG & multimodal synergy
   - > 详见《MatrixOne Intelligence 解决方案白皮书》/ See the Intelligence solution whitepaper
 
 ### 09 · 应用收益 / Value & Benefits　🟡
@@ -196,8 +195,8 @@
 | FIG-3 | 05 | TAE 存储引擎内部结构 / TAE internals |
 | FIG-4 | 06.2 | Git for Data：快照/分支/时间旅行示意 / Git-for-Data concept |
 | FIG-5 | 06.3 | 混合检索流程（标量+向量+全文）/ Hybrid search pipeline |
-| FIG-6 | 08 | MatrixOS 生态全景（MatrixDC / MatrixOne / MatrixGenesis）/ MatrixOS ecosystem |
-| FIG-7 | 04/08 | 异构算力与 GPU 加速调度（MatrixDC + RDMA）/ Heterogeneous compute & GPU scheduling |
+| FIG-6 | 08 | MatrixOne Intelligence 生态全景（MatrixGenesis / MatrixPipeline / MatrixSearch）/ Intelligence ecosystem |
+| FIG-7 | 04/08 | 异构算力与 GPU 加速调度（K8s + RDMA）/ Heterogeneous compute & GPU scheduling |
 | FIG-8 | 06 | GPU 向量检索性能对比（cuVS：建索引时间 / QPS）/ GPU vector search benchmark (cuVS) |
 
 ---
@@ -214,12 +213,11 @@
 - [ ] Memoria / Intelligence 各组件的最新命名与能力边界 / Latest ecosystem naming
 - [x] **核心库内 GPU 加速**：已确认经 NVIDIA cuVS 实现 GPU 向量索引/检索（IVF-Flat / IVF-PQ / CAGRA）/ Confirmed via cuVS
 - [ ] cuVS 集成最新性能数据、支持的 GPU 型号与距离度量（L2/IP/cosine）/ Latest cuVS figures, GPUs, metrics
-- [ ] **MatrixDC** 异构算力调度细节、支持的 GPU 型号与 RDMA 方案 / MatrixDC scheduling & supported GPUs
-- [ ] **MatrixOS** 体系与三大组件（MatrixDC/MatrixOne/MatrixGenesis）的最新官方命名 / Latest MatrixOS naming
+- [ ] AI 生态最新组件构成与命名（MatrixGenesis / MatrixPipeline / MatrixSearch / Memoria 等）/ Latest ecosystem composition & naming
 
 > ⚠️ 以上均以官方文档 <https://docs.matrixorigin.cn> 与源码 <https://github.com/matrixorigin/matrixone> 为准。
 >
 > **本轮新增参考 / Added references：**
 > - MatrixOne System Architecture（Medium）：<https://medium.com/@matrixorigin-database/matrixone-system-architecture-8d4de36649ea>
-> - MatrixOne → MatrixOS（AI Infra / AI Platform）：<https://www.matrixorigin.io/posts/MatrixOne-MatrixOS>
+> - MatrixOrigin 产品体系演进（AI Infra / AI Platform）：<https://www.matrixorigin.io/posts/MatrixOne-MatrixOS>
 > - MatrixOne × NVIDIA cuVS（GPU 向量检索）：<https://www.matrixorigin.io/blog/matrixone-nvidia-cuvs-vector-search>

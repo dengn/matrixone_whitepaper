@@ -1,4 +1,4 @@
-# 08 · MatrixOS Ecosystem: GPU/Heterogeneous Compute & AI Data Backbone
+# 08 · MatrixOne Intelligence: AI Data Backbone & Ecosystem
 
 > 🚧 Status: Draft skeleton only / 待撰写
 > 📑 See outline: [../../OUTLINE.md](../../OUTLINE.md)
@@ -7,5 +7,5 @@
 ---
 
 <!-- Body TBD: fill section by section per OUTLINE.md.
-     Focus: MatrixDC heterogeneous (CPU+GPU) compute & GPU acceleration,
-     MatrixGenesis, agent memory backbone. -->
+     Focus: ecosystem (MatrixGenesis/MatrixPipeline/MatrixSearch), GPU &
+     heterogeneous compute, agent memory backbone. -->
